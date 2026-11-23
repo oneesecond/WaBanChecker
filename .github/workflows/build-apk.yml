@@ -1,0 +1,38 @@
+name: Build WA Ban Checker APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          unzip WABanChecker-Android-Project-GitHubBuild.zip -d extracted
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build APK
+        run: |
+          cd extracted
+          find . -name gradlew -exec chmod +x {} \;
+          cd "$(dirname "$(find . -name gradlew | head -1)")"
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: WA-Ban-Checker-APK
+          path: extracted/**/build/outputs/apk/debug/*.apk
